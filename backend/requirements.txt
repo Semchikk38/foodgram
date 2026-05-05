@@ -1,0 +1,12 @@
+Django>=4.2,<5.0
+djangorestframework>=3.14,<4.0
+djoser>=2.2,<3.0
+django-filter>=23.5,<24
+djangorestframework_simplejwt>=5.3,<6.0
+gunicorn>=22.0,<23
+psycopg2-binary>=2.9,<3.0
+Pillow>=10.0,<11.0
+python-dotenv>=1.0,<2.0
+social-auth-app-django>=5.4,<6.0
+social-auth-core>=4.5,<5.0
+requests>=2.31,<3.0
