@@ -59,6 +59,7 @@ python manage.py migrate
 python manage.py load_ingredients  # загрузить ингредиенты
 python manage.py createsuperuser
 python manage.py runserver
+```
 
 ##  Запуск в Docker
 1. Убедитесь, что установлены Docker и Docker Compose.  
@@ -74,6 +75,7 @@ DB_PORT=5432
 SECRET_KEY=ваш_секретный_ключ
 DEBUG=False
 ALLOWED_HOSTS=foodgram.myftp.biz,51.250.18.171
+```
 3. В папке `infra` выполните:
 ```bash
 docker compose up -d --build
@@ -81,12 +83,14 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py load_ingredients
 docker compose exec backend python manage.py collectstatic --noinput
 docker compose exec backend python manage.py createsuperuser
+```
 4. Сайт будет доступен по адресу https://foodgram.myftp.biz.
 
 ##  Настройка HTTPS
 Для получения SSL-сертификата использовался Let's Encrypt:
 ```bash
 sudo certbot certonly --standalone -d foodgram.myftp.biz
+```
 После получения сертификатов в nginx.conf и docker-compose.yml были внесены соответствующие изменения.
 
 ## Документация API
