@@ -30,12 +30,17 @@ services:
     image: nginx:1.25.4-alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - frontend_build:/usr/share/nginx/html/
+      - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static_backend:/var/html/static/
       - media_value:/var/html/media/
+      - /etc/letsencrypt/live/foodgram.myftp.biz/fullchain.pem:/etc/letsencrypt/live/foodgram.myftp.biz/fullchain.pem:ro
+      - /etc/letsencrypt/live/foodgram.myftp.biz/privkey.pem:/etc/letsencrypt/live/foodgram.myftp.biz/privkey.pem:ro
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
     restart: always
 
 volumes:
