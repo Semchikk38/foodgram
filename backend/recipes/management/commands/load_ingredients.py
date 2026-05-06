@@ -15,4 +15,6 @@ class Command(BaseCommand):
                     name=item['name'],
                     measurement_unit=item['measurement_unit']
                 )
-        self.stdout.write(self.style.SUCCESS('Ingredients loaded successfully'))
+        self.stdout.write(
+            self.style.SUCCESS('Ingredients loaded successfully')
+        )

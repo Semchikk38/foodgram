@@ -10,7 +10,9 @@ class RecipeFilter(django_filters.FilterSet):
         queryset=Tag.objects.all(),
     )
     is_favorited = django_filters.NumberFilter(method='filter_is_favorited')
-    is_in_shopping_cart = django_filters.NumberFilter(method='filter_is_in_shopping_cart')
+    is_in_shopping_cart = django_filters.NumberFilter(
+        method='filter_is_in_shopping_cart'
+    )
     author = django_filters.NumberFilter(field_name='author__id')
 
     class Meta:
