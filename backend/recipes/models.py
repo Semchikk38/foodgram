@@ -1,9 +1,12 @@
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 
-from recipes.constants import (MAX_INGREDIENT_NAME_LENGTH, MAX_NAME_LENGTH,
-                               MAX_TAG_NAME_LENGTH, MAX_UNIT_LENGTH)
+from recipes.constants import (
+    MAX_INGREDIENT_NAME_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_TAG_NAME_LENGTH,
+    MAX_UNIT_LENGTH,
+)
 from users.models import User
 
 
@@ -23,7 +26,10 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return f'{self.name} ({self.measurement_unit})'
+        return (
+            f'{self.name} '
+            f'({self.measurement_unit})'
+        )
 
 
 class Tag(models.Model):
@@ -74,7 +80,6 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
         verbose_name='Время приготовления (мин)'
     )
     pub_date = models.DateTimeField(
@@ -104,7 +109,6 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
         verbose_name='Количество'
     )
 
@@ -113,7 +117,11 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self):
-        return f'{self.ingredient.name} – {self.amount} {self.ingredient.measurement_unit}'
+        return (
+            f'{self.ingredient.name} – '
+            f'{self.amount} '
+            f'{self.ingredient.measurement_unit}'
+        )
 
 
 class Favorite(models.Model):
@@ -132,13 +140,19 @@ class Favorite(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['user', 'recipe'], name='unique_favorite')
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite'
+            )
         ]
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
     def __str__(self):
-        return f'{self.user.username} -> {self.recipe.name}'
+        return (
+            f'{self.user.username} -> '
+            f'{self.recipe.name}'
+        )
 
 
 class ShoppingCart(models.Model):
@@ -157,13 +171,19 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['user', 'recipe'], name='unique_shopping_cart')
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shopping_cart'
+            )
         ]
         verbose_name = 'Покупка'
         verbose_name_plural = 'Список покупок'
 
     def __str__(self):
-        return f'{self.user.username} -> {self.recipe.name}'
+        return (
+            f'{self.user.username} -> '
+            f'{self.recipe.name}'
+        )
 
 
 class Subscription(models.Model):
@@ -182,7 +202,10 @@ class Subscription(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['user', 'author'], name='unique_subscription'),
+            UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscription'
+            ),
             CheckConstraint(
                 condition=~Q(user__exact=F('author')),
                 name='no_self_subscription'
@@ -192,4 +215,8 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return f'{self.user.username} подписан на {self.author.username}'
+        return (
+            f'{self.user.username} '
+            f'подписан на '
+            f'{self.author.username}'
+        )
