@@ -2,6 +2,7 @@ import base64
 
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+
 from users.serializers import CustomUserSerializer
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
@@ -15,12 +16,9 @@ class Base64ImageField(serializers.CharField):
             raise serializers.ValidationError(
                 'Неверный формат изображения. Ожидается base64-строка.'
             )
-        format, imgstr = data.split(';base64,')
-        ext = format.split('/')[-1]
-        return ContentFile(
-            base64.b64decode(imgstr),
-            name=f'temp.{ext}'
-        )
+        fmt, imgstr = data.split(';base64,')
+        ext = fmt.split('/')[-1]
+        return ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -32,7 +30,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-
         fields = ('id', 'name', 'slug')
 
 
@@ -57,11 +54,13 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags',
-                  'author', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart',
-                  'name', 'image',
-                  'text', 'cooking_time')
+        fields = (
+            'id', 'tags',
+            'author', 'ingredients',
+            'is_favorited', 'is_in_shopping_cart',
+            'name', 'image',
+            'text', 'cooking_time',
+        )
 
     def get_ingredients(self, obj):
         queryset = RecipeIngredient.objects.filter(recipe=obj)
@@ -82,33 +81,34 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
+        queryset=Tag.objects.all(),
+        many=True
     )
     ingredients = serializers.ListField(
         child=serializers.DictField(
-            child=serializers.IntegerField()
+            child=serializers.IntegerField(min_value=1)
         ),
         write_only=True
     )
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
         fields = (
             'id', 'tags', 'ingredients',
-            'image', 'name', 'text', 'cooking_time'
+            'image', 'name', 'text', 'cooking_time',
         )
 
     def _save_ingredients(self, recipe, ingredients_data):
-        recipe_ingredients = []
-        for item in ingredients_data:
-            ingredient_id = item['id']
-            amount = item['amount']
-            recipe_ingredients.append(
-                RecipeIngredient(
-                    recipe=recipe, ingredient_id=ingredient_id, amount=amount
-                )
+        recipe_ingredients = [
+            RecipeIngredient(
+                recipe=recipe,
+                ingredient_id=item['id'],
+                amount=item['amount']
             )
+            for item in ingredients_data
+        ]
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
 
     def create(self, validated_data):

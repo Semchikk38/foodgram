@@ -1,23 +1,17 @@
 from django.urls import include, path
-from recipes.views import (IngredientViewSet, RecipeViewSet,
-                           SubscriptionViewSet, TagViewSet)
 from rest_framework.routers import DefaultRouter
-from users.views import AvatarViewSet
+
+from api.views import (CustomUserViewSet, IngredientViewSet, RecipeViewSet,
+                       ShortLinkRedirectView, TagViewSet)
 
 router = DefaultRouter()
 router.register('ingredients', IngredientViewSet)
 router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet)
+router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
-    path('users/subscriptions/',
-         SubscriptionViewSet.as_view({'get': 'subscriptions'})),
-    path('users/<int:id>/subscribe/',
-         SubscriptionViewSet.as_view({
-             'post': 'subscribe', 'delete': 'unsubscribe'
-         })),
-    path('users/me/avatar/', AvatarViewSet.as_view()),
-
+    path('s/<int:short_id>/', ShortLinkRedirectView.as_view(), name='short-link'),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
     path('', include(router.urls)),
