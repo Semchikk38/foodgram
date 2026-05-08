@@ -19,7 +19,8 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(fav_count=Count('favorites'))
+        return super().get_queryset(request).annotate(
+            fav_count=Count('favorites'))
 
     def favorite_count(self, obj):
         return obj.fav_count

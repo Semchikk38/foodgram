@@ -36,11 +36,13 @@ class CustomUserViewSet(DjoserUserViewSet):
 
     @action(detail=False, methods=['get'])
     def subscriptions(self, request):
-        authors = User.objects.filter(subscribers__user=request.user).distinct()
+        authors = User.objects.filter(
+            subscribers__user=request.user).distinct()
         page = self.paginate_queryset(authors)
         if page is not None:
             serializer = UserWithRecipesSerializer(page, many=True,
-                                                   context={'request': request})
+                                                   context={'request': request}
+                                                   )
             return self.get_paginated_response(serializer.data)
         serializer = UserWithRecipesSerializer(authors, many=True,
                                                context={'request': request})
@@ -55,7 +57,9 @@ class CustomUserViewSet(DjoserUserViewSet):
                 {'error': 'Нельзя подписаться на самого себя.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        _, created = Subscription.objects.get_or_create(user=user, author=author)
+        _, created = Subscription.objects.get_or_create(
+            user=user, author=author
+        )
         if not created:
             return Response(
                 {'error': 'Вы уже подписаны на этого пользователя.'},
@@ -69,7 +73,8 @@ class CustomUserViewSet(DjoserUserViewSet):
     def unsubscribe(self, request, id=None):
         author = get_object_or_404(User, pk=id)
         user = request.user
-        deleted, _ = Subscription.objects.filter(user=user, author=author).delete()
+        deleted, _ = Subscription.objects.filter(
+            user=user, author=author).delete()
         if not deleted:
             return Response(
                 {'error': 'Вы не подписаны на этого пользователя.'},
@@ -84,7 +89,11 @@ class CustomUserViewSet(DjoserUserViewSet):
                                              data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            avatar_url = request.user.avatar.url if request.user.avatar else None
+            avatar_url = (
+                request.user.avatar.url
+                if request.user.avatar
+                else None
+            )
             return Response({'avatar': avatar_url})
         elif request.method == 'DELETE':
             user = request.user
@@ -162,7 +171,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        _, created = ShoppingCart.objects.get_or_create(user=user, recipe=recipe)
+        _, created = ShoppingCart.objects.get_or_create(
+            user=user, recipe=recipe)
         if not created:
             return Response(
                 {'error': 'Рецепт уже в списке покупок.'},
@@ -175,7 +185,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def delete_shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        deleted, _ = ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
+        deleted, _ = ShoppingCart.objects.filter(
+            user=user, recipe=recipe).delete()
         if not deleted:
             return Response(
                 {'error': 'Рецепта не было в списке покупок.'},
