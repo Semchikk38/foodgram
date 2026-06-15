@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import CheckConstraint, F, Q, UniqueConstraint
+from django.core.validators import MinValueValidator
 
 from recipes.constants import (
     MAX_INGREDIENT_NAME_LENGTH,
@@ -80,6 +81,7 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
     cooking_time = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
         verbose_name='Время приготовления (мин)'
     )
     pub_date = models.DateTimeField(

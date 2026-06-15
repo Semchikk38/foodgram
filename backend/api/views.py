@@ -11,16 +11,29 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
-from recipes.filters import RecipeFilter
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Subscription, Tag)
-from recipes.pagination import CustomPageNumberPagination
-from recipes.serializers import (IngredientSerializer,
-                                 RecipeCreateUpdateSerializer,
-                                 RecipeListSerializer,
-                                 RecipeMinifiedSerializer, TagSerializer)
+from api.filters.recipe_filters import RecipeFilter  # новый путь
+from api.pagination import CustomPageNumberPagination  # новый путь
+from api.serializers.recipes import (
+    IngredientSerializer,
+    RecipeCreateUpdateSerializer,
+    RecipeListSerializer,
+    RecipeMinifiedSerializer,
+    TagSerializer,
+)
+from api.serializers.users import (
+    SetAvatarSerializer,
+    UserWithRecipesSerializer,
+)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Subscription,
+    Tag,
+)
 from users.models import User
-from users.serializers import SetAvatarSerializer, UserWithRecipesSerializer
 
 from .permissions import IsAuthorOrReadOnly
 

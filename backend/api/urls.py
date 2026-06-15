@@ -11,6 +11,10 @@ router.register('recipes', RecipeViewSet)
 router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
+    path(
+        'users/subscriptions/',
+        CustomUserViewSet.as_view({'get': 'subscriptions'})
+    ),
     path('s/<int:short_id>/', ShortLinkRedirectView.as_view(),
          name='short-link'),
     path('auth/', include('djoser.urls.authtoken')),

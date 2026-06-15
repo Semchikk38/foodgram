@@ -15,7 +15,7 @@
 
 ##  Демо-версия
 Проект развёрнут и доступен по адресу:  
-[https://foodgram.myftp.biz](https://foodgram.myftp.biz)
+[https://foodgram.servequake.com](https://foodgram.servequake.com)
 
 ##  Технологический стек
 - **Backend:** Python 3.10, Django 4.2 LTS, Django REST Framework  
@@ -74,7 +74,7 @@ DB_HOST=db
 DB_PORT=5432
 SECRET_KEY=ваш_секретный_ключ
 DEBUG=False
-ALLOWED_HOSTS=foodgram.myftp.biz,51.250.18.171
+ALLOWED_HOSTS=foodgram.servequake.com,51.250.18.171
 ```
 3. В папке `infra` выполните:
 ```bash
@@ -84,12 +84,12 @@ docker compose exec backend python manage.py load_ingredients
 docker compose exec backend python manage.py collectstatic --noinput
 docker compose exec backend python manage.py createsuperuser
 ```
-4. Сайт будет доступен по адресу https://foodgram.myftp.biz.
+4. Сайт будет доступен по адресу https://foodgram.servequake.com.
 
 ##  Настройка HTTPS
 Для получения SSL-сертификата использовался Let's Encrypt:
 ```bash
-sudo certbot certonly --standalone -d foodgram.myftp.biz
+sudo certbot certonly --standalone -d foodgram.servequake.com
 ```
 После получения сертификатов в nginx.conf и docker-compose.yml были внесены соответствующие изменения.
 
