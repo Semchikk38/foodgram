@@ -209,7 +209,7 @@ class Subscription(models.Model):
                 name='unique_subscription'
             ),
             CheckConstraint(
-                check=~Q(user__exact=F('author')),
+                condition=~Q(user__exact=F('author')),
                 name='no_self_subscription'
             )
         ]
