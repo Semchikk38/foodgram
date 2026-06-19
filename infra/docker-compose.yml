@@ -41,6 +41,7 @@ services:
       - /etc/letsencrypt/live/foodgram.myftp.biz/privkey.pem:/etc/letsencrypt/live/foodgram.myftp.biz/privkey.pem:ro
       - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
       - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: always
 
 volumes:

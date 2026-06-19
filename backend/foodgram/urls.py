@@ -1,4 +1,4 @@
-from api.views import ShortLinkRedirectView
+from api.views import ShortLinkView
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -10,7 +10,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path(
         's/<int:short_id>/',
-        ShortLinkRedirectView.as_view(), name='short-link'
+        ShortLinkView.as_view(), name='short-link'
     ),
 ]
 

@@ -1,14 +1,22 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Subscription, Tag)
+from .models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
     min_num = 1
+
+    def clean(self):
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                amount = form.cleaned_data.get('amount', 0)
+                if amount <= 0:
+                    raise ValidationError("Количество ингредиента должно быть больше 0")
+        return super().clean()
 
 
 @admin.register(Recipe)
@@ -40,4 +48,3 @@ class TagAdmin(admin.ModelAdmin):
 
 admin.site.register(Favorite)
 admin.site.register(ShoppingCart)
-admin.site.register(Subscription)
