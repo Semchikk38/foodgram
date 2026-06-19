@@ -70,21 +70,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Recipe.objects.all()
         if self.action == 'list':
-            queryset = queryset.select_related('author').prefetch_related('tags', 'ingredients__ingredient')
+            queryset = queryset.select_related('author').prefetch_related(
+                'tags', 'ingredients__ingredient'
+            )
         return queryset
 
     @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
-            if Favorite.objects.filter(user=request.user, recipe=recipe).exists():
+            if Favorite.objects.filter(
+                user=request.user, recipe=recipe
+            ).exists():
                 return Response({'detail': 'Рецепт уже в избранном.'},
                                 status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.create(user=request.user, recipe=recipe)
             serializer = RecipeMinifiedSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:  # DELETE
-            favorite = Favorite.objects.filter(user=request.user, recipe=recipe)
+            favorite = Favorite.objects.filter(
+                user=request.user, recipe=recipe
+            )
             if not favorite.exists():
                 return Response({'detail': 'Рецепта нет в избранном.'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -95,14 +101,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(user=request.user, recipe=recipe).exists():
+            if ShoppingCart.objects.filter(
+                user=request.user, recipe=recipe
+            ).exists():
                 return Response({'detail': 'Рецепт уже в списке покупок.'},
                                 status=status.HTTP_400_BAD_REQUEST)
             ShoppingCart.objects.create(user=request.user, recipe=recipe)
             serializer = RecipeMinifiedSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:  # DELETE
-            cart_item = ShoppingCart.objects.filter(user=request.user, recipe=recipe)
+            cart_item = ShoppingCart.objects.filter(
+                user=request.user, recipe=recipe
+            )
             if not cart_item.exists():
                 return Response({'detail': 'Рецепта нет в списке покупок.'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -116,7 +126,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Необходима авторизация.'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        cart_items = ShoppingCart.objects.filter(user=user).select_related('recipe')
+        cart_items = ShoppingCart.objects.filter(
+            user=user
+        ).select_related('recipe')
         if not cart_items:
             return Response({'detail': 'Список покупок пуст.'},
                             status=status.HTTP_404_NOT_FOUND)
@@ -135,18 +147,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output.write('Список покупок:\n\n')
         for item in ingredients:
             output.write(
-                f"{item['ingredient__name']} ({item['ingredient__measurement_unit']}) — {item['total_amount']}\n"
+                "{name} ({unit}) — {amount}\n".format(
+                    name=item['ingredient__name'],
+                    unit=item['ingredient__measurement_unit'],
+                    amount=item['total_amount']
+                )
             )
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt'
+        )
         return response
 
     @action(detail=True, methods=['get'])
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         short_id = recipe.pk
-        return Response({'short-link': f'https://{request.get_host()}/s/{short_id}'})
+        return Response(
+            {'short-link': f'https://{request.get_host()}/s/{short_id}'}
+        )
 
 
 class ShortLinkView(View):
@@ -169,13 +189,19 @@ class CustomUserViewSet(DjoserUserViewSet):
         user = request.user
         if not user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        subscriptions = Subscription.objects.filter(user=user).select_related('author')
+        subscriptions = Subscription.objects.filter(
+            user=user
+        ).select_related('author')
         authors = [sub.author for sub in subscriptions]
         page = self.paginate_queryset(authors)
         if page is not None:
-            serializer = UserWithRecipesSerializer(page, many=True, context={'request': request})
+            serializer = UserWithRecipesSerializer(
+                page, many=True, context={'request': request}
+            )
             return self.get_paginated_response(serializer.data)
-        serializer = UserWithRecipesSerializer(authors, many=True, context={'request': request})
+        serializer = UserWithRecipesSerializer(
+            authors, many=True, context={'request': request}
+        )
         return Response(serializer.data)
 
     @action(detail=True, methods=['post', 'delete'])
@@ -188,17 +214,24 @@ class CustomUserViewSet(DjoserUserViewSet):
 
         if request.method == 'POST':
             if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'detail': 'Вы уже подписаны на этого автора.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого автора.'},
+                    status=status.HTTP_400_BAD_REQUEST)
             Subscription.objects.create(user=user, author=author)
-            serializer = UserWithRecipesSerializer(author, context={'request': request})
+            serializer = UserWithRecipesSerializer(
+                author, context={'request': request}
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         else:  # DELETE
-            subscription = Subscription.objects.filter(user=user, author=author)
+            subscription = Subscription.objects.filter(
+                user=user, author=author
+            )
             if not subscription.exists():
                 return Response({'detail': 'Вы не подписаны на этого автора.'},
                                 status=status.HTTP_400_BAD_REQUEST)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 ShortLinkRedirectView = ShortLinkView
