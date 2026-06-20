@@ -133,7 +133,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Список покупок пуст.'},
                             status=status.HTTP_404_NOT_FOUND)
 
-        # Группируем ингредиенты по названию и единице измерения
         ingredients = (
             RecipeIngredient.objects
             .filter(recipe__shopping_cart__user=user)
@@ -146,13 +145,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output = io.StringIO()
         output.write('Список покупок:\n\n')
         for item in ingredients:
-            output.write(
-                "{name} ({unit}) — {amount}\n".format(
-                    name=item['ingredient__name'],
-                    unit=item['ingredient__measurement_unit'],
-                    amount=item['total_amount']
-                )
-            )
+            name = item['ingredient__name']
+            unit = item['ingredient__measurement_unit']
+            amount = item['total_amount']
+            output.write(f"{name} ({unit}) — {amount}\n")
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
         response['Content-Disposition'] = (
@@ -167,6 +163,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(
             {'short-link': f'https://{request.get_host()}/s/{short_id}'}
         )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        output_serializer = RecipeListSerializer(
+            serializer.instance, context={'request': request}
+        )
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        output_serializer = RecipeListSerializer(
+            serializer.instance, context={'request': request}
+        )
+        return Response(output_serializer.data)
 
 
 class ShortLinkView(View):

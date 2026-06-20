@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from recipes.models import Recipe, Ingredient, Tag, RecipeIngredient
-from users.models import User, Subscription
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -47,8 +47,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart', 'name', 'image',
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+                  'is_in_shopping_cart', 'name', 'image',
                   'text', 'cooking_time'
                   )
 
@@ -158,9 +158,3 @@ class UserWithRecipesSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count')
-
-
-class SubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscription
-        fields = ('id', 'user', 'author', 'created_at')
