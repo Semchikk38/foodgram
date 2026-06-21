@@ -138,10 +138,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output.write('Список покупок:\n\n')
         for item in ingredients:
             output.write(
-                f"{
-                    item['ingredient__name']} ({
-                    item['ingredient__measurement_unit']}) — {
-                    item['total_amount']}\n")
+                output.write(
+                    f"{item['ingredient__name']} ({item['ingredient__measurement_unit']}) "
+                    f"— {item['total_amount']}\n"
+                )
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
         response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
