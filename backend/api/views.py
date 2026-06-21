@@ -38,15 +38,23 @@ from .permissions import IsAuthorOrReadOnly
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
     permission_classes = (permissions.AllowAny,)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('^name',)
+    pagination_class = None
     permission_classes = (permissions.AllowAny,)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        name = request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__istartswith=name)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
