@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import UniqueConstraint
+from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 from django.core.validators import MinValueValidator
 
 from recipes.constants import (
@@ -186,3 +186,5 @@ class ShoppingCart(models.Model):
             f'{self.user.username} -> '
             f'{self.recipe.name}'
         )
+
+
