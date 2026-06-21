@@ -144,7 +144,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 output.write(f"{name} ({unit}) — {amount}\n")
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt'
+        )
         return response
 
     @action(detail=True, methods=['get'])
@@ -197,8 +199,10 @@ class CustomUserViewSet(DjoserUserViewSet):
 
         if request.method == 'POST':
             if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'detail': 'Вы уже подписаны на этого автора.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого автора.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             Subscription.objects.create(user=user, author=author)
             serializer = UserWithRecipesSerializer(
                 author, context={'request': request})
