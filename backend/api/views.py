@@ -77,7 +77,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
-            if Favorite.objects.filter(user=request.user, recipe=recipe).exists():
+            if Favorite.objects.filter(
+                user=request.user, recipe=recipe
+            ).exists():
                 return Response({'detail': 'Рецепт уже в избранном.'},
                                 status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.create(user=request.user, recipe=recipe)
@@ -96,7 +98,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(user=request.user, recipe=recipe).exists():
+            if ShoppingCart.objects.filter(
+                user=request.user, recipe=recipe
+            ).exists():
                 return Response({'detail': 'Рецепт уже в списке покупок.'},
                                 status=status.HTTP_400_BAD_REQUEST)
             ShoppingCart.objects.create(user=request.user, recipe=recipe)
@@ -137,19 +141,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output = io.StringIO()
         output.write('Список покупок:\n\n')
         for item in ingredients:
-            output.write(
-                f"{item['ingredient__name']} ({item['ingredient__measurement_unit']}) — {item['total_amount']}\n"
-            )
+            for item in ingredients:
+                name = item['ingredient__name']
+                unit = item['ingredient__measurement_unit']
+                amount = item['total_amount']
+                output.write(f"{name} ({unit}) — {amount}\n")
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt'
+        )
         return response
 
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         short_id = recipe.pk
-        return Response({'short-link': f'https://{request.get_host()}/s/{short_id}'})
+        return Response(
+            {'short-link': f'https://{request.get_host()}/s/{short_id}'}
+        )
 
 
 class ShortLinkView(View):
@@ -194,8 +204,9 @@ class CustomUserViewSet(DjoserUserViewSet):
 
         if request.method == 'POST':
             if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'detail': 'Вы уже подписаны на этого автора.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого автора.'},
+                    status=status.HTTP_400_BAD_REQUEST)
             Subscription.objects.create(user=user, author=author)
             serializer = UserWithRecipesSerializer(
                 author, context={'request': request})

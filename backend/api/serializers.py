@@ -53,15 +53,20 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time')
+                  'is_in_shopping_cart', 'name', 'image', 'text',
+                  'cooking_time')
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
-        return user.is_authenticated and obj.favorites.filter(user=user).exists()
+        return user.is_authenticated and obj.favorites.filter(
+            user=user
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
-        return user.is_authenticated and obj.in_shopping_cart.filter(user=user).exists()
+        return user.is_authenticated and obj.in_shopping_cart.filter(
+            user=user
+        ).exists()
 
     def validate_ingredients(self, value):
         for item in value:
@@ -116,7 +121,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 ext = format.split('/')[-1]
                 validated_data['image'] = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f'recipe_{self.context["request"].user.id}_{int(time.time())}.{ext}'
+                    name=f'recipe_{self.context["request"].user.id}_{int(
+                        time.time()
+                    )}.{ext}'
                 )
             except (ValueError, TypeError):
                 pass
