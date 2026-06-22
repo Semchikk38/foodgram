@@ -119,11 +119,11 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
+                user_id = self.context['request'].user.id
+                filename = f'recipe_{user_id}_{int(time.time())}.{ext}'
                 validated_data['image'] = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f'recipe_{self.context["request"].user.id}_{int(
-                        time.time()
-                    )}.{ext}'
+                    name=filename
                 )
             except (ValueError, TypeError):
                 pass
