@@ -1,8 +1,13 @@
-from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import UniqueConstraint
-from recipes.constants import (MAX_INGREDIENT_NAME_LENGTH, MAX_NAME_LENGTH,
-                               MAX_TAG_NAME_LENGTH, MAX_UNIT_LENGTH)
+from django.db.models import CheckConstraint, F, Q, UniqueConstraint
+from django.core.validators import MinValueValidator
+
+from recipes.constants import (
+    MAX_INGREDIENT_NAME_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_TAG_NAME_LENGTH,
+    MAX_UNIT_LENGTH,
+)
 from users.models import User
 
 
@@ -106,6 +111,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
         verbose_name='Количество'
     )
 
@@ -181,3 +187,5 @@ class ShoppingCart(models.Model):
             f'{self.user.username} -> '
             f'{self.recipe.name}'
         )
+
+
