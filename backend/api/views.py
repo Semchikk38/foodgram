@@ -147,10 +147,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 f"{
                     item['ingredient__name']} ({
                     item['ingredient__measurement_unit']}) — {
-                    item['total_amount']}\n")
+                    item['total_amount']}\n"
+            )
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt'
+        )
         return response
 
     @action(detail=True, methods=['get'], url_path='get-link')

@@ -15,8 +15,10 @@ urlpatterns = [
     path('users/me/avatar/', CustomUserViewSet.as_view(
         {'patch': 'avatar', 'put': 'avatar'}), name='user-avatar-me'),
     path('users/subscriptions/',
-         CustomUserViewSet.as_view({'get': 'subscriptions'}), name='user-subscriptions'),
-    path('s/<int:short_id>/', ShortLinkRedirectView.as_view(), name='short-link'),
+         CustomUserViewSet.as_view({'get': 'subscriptions'}),
+         name='user-subscriptions'),
+    path('s/<int:short_id>/', ShortLinkRedirectView.as_view(),
+         name='short-link'),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
     path('', include(router.urls)),
