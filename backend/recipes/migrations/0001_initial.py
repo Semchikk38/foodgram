@@ -17,7 +17,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ingredient',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(db_index=True, max_length=128)),
                 ('measurement_unit', models.CharField(max_length=64)),
             ],
@@ -28,7 +29,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Tag',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=32, unique=True)),
                 ('slug', models.SlugField(max_length=32, unique=True)),
             ],
@@ -39,13 +41,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Recipe',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=256)),
                 ('image', models.ImageField(upload_to='recipes/')),
                 ('text', models.TextField()),
                 ('cooking_time', models.PositiveIntegerField()),
                 ('pub_date', models.DateTimeField(auto_now_add=True)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='recipes', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'ordering': ('-pub_date',),
@@ -54,28 +58,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RecipeIngredient',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.PositiveIntegerField()),
-                ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.recipe')),
+                ('ingredient', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient')),
+                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='recipe_ingredients', to='recipes.recipe')),
             ],
         ),
         migrations.AddField(
             model_name='recipe',
             name='ingredients',
-            field=models.ManyToManyField(through='recipes.RecipeIngredient', to='recipes.ingredient'),
+            field=models.ManyToManyField(
+                through='recipes.RecipeIngredient', to='recipes.ingredient'),
         ),
         migrations.AddField(
             model_name='recipe',
             name='tags',
-            field=models.ManyToManyField(related_name='recipes', to='recipes.tag'),
+            field=models.ManyToManyField(
+                related_name='recipes', to='recipes.tag'),
         ),
         migrations.CreateModel(
             name='Favorite',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL)),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to='recipes.recipe')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='favorites', to=settings.AUTH_USER_MODEL)),
+                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='favorites', to='recipes.recipe')),
             ],
             options={
                 'constraints': [models.UniqueConstraint(fields=('user', 'recipe'), name='unique_favorite')],
@@ -84,9 +96,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ShoppingCart',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_shopping_cart', to='recipes.recipe')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to=settings.AUTH_USER_MODEL)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='in_shopping_cart', to='recipes.recipe')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='shopping_cart', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'constraints': [models.UniqueConstraint(fields=('user', 'recipe'), name='unique_shopping_cart')],
@@ -95,9 +110,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Subscription',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscribers', to=settings.AUTH_USER_MODEL)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to=settings.AUTH_USER_MODEL)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='subscribers', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='subscriptions', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'constraints': [models.UniqueConstraint(fields=('user', 'author'), name='unique_subscription')],

@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Subscription
+
+from .models import Subscription, User
 
 # Регистрируем модель User с стандартным UserAdmin
 admin.site.register(User, UserAdmin)
+
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):

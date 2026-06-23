@@ -16,46 +16,56 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='favorite',
-            options={'verbose_name': 'Избранное', 'verbose_name_plural': 'Избранное'},
+            options={'verbose_name': 'Избранное',
+                     'verbose_name_plural': 'Избранное'},
         ),
         migrations.AlterModelOptions(
             name='ingredient',
-            options={'ordering': ('name',), 'verbose_name': 'Ингредиент', 'verbose_name_plural': 'Ингредиенты'},
+            options={'ordering': (
+                'name',), 'verbose_name': 'Ингредиент', 'verbose_name_plural': 'Ингредиенты'},
         ),
         migrations.AlterModelOptions(
             name='recipe',
-            options={'ordering': ('-pub_date',), 'verbose_name': 'Рецепт', 'verbose_name_plural': 'Рецепты'},
+            options={'ordering': (
+                '-pub_date',), 'verbose_name': 'Рецепт', 'verbose_name_plural': 'Рецепты'},
         ),
         migrations.AlterModelOptions(
             name='recipeingredient',
-            options={'verbose_name': 'Ингредиент рецепта', 'verbose_name_plural': 'Ингредиенты рецепта'},
+            options={'verbose_name': 'Ингредиент рецепта',
+                     'verbose_name_plural': 'Ингредиенты рецепта'},
         ),
         migrations.AlterModelOptions(
             name='shoppingcart',
-            options={'verbose_name': 'Покупка', 'verbose_name_plural': 'Список покупок'},
+            options={'verbose_name': 'Покупка',
+                     'verbose_name_plural': 'Список покупок'},
         ),
         migrations.AlterModelOptions(
             name='subscription',
-            options={'verbose_name': 'Подписка', 'verbose_name_plural': 'Подписки'},
+            options={'verbose_name': 'Подписка',
+                     'verbose_name_plural': 'Подписки'},
         ),
         migrations.AlterModelOptions(
             name='tag',
-            options={'ordering': ('name',), 'verbose_name': 'Тег', 'verbose_name_plural': 'Теги'},
+            options={'ordering': ('name',), 'verbose_name': 'Тег',
+                     'verbose_name_plural': 'Теги'},
         ),
         migrations.AlterField(
             model_name='favorite',
             name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to='recipes.recipe', verbose_name='Рецепт'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='favorites', to='recipes.recipe', verbose_name='Рецепт'),
         ),
         migrations.AlterField(
             model_name='favorite',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='favorites', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
         ),
         migrations.AlterField(
             model_name='ingredient',
             name='measurement_unit',
-            field=models.CharField(max_length=64, verbose_name='Единица измерения'),
+            field=models.CharField(
+                max_length=64, verbose_name='Единица измерения'),
         ),
         migrations.AlterField(
             model_name='ingredient',
@@ -65,22 +75,26 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipe',
             name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор'),
         ),
         migrations.AlterField(
             model_name='recipe',
             name='cooking_time',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Время приготовления (мин)'),
+            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(
+                1)], verbose_name='Время приготовления (мин)'),
         ),
         migrations.AlterField(
             model_name='recipe',
             name='image',
-            field=models.ImageField(upload_to='recipes/', verbose_name='Изображение'),
+            field=models.ImageField(
+                upload_to='recipes/', verbose_name='Изображение'),
         ),
         migrations.AlterField(
             model_name='recipe',
             name='ingredients',
-            field=models.ManyToManyField(through='recipes.RecipeIngredient', to='recipes.ingredient', verbose_name='Ингредиенты'),
+            field=models.ManyToManyField(
+                through='recipes.RecipeIngredient', to='recipes.ingredient', verbose_name='Ингредиенты'),
         ),
         migrations.AlterField(
             model_name='recipe',
@@ -90,12 +104,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipe',
             name='pub_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Дата публикации'),
         ),
         migrations.AlterField(
             model_name='recipe',
             name='tags',
-            field=models.ManyToManyField(related_name='recipes', to='recipes.tag', verbose_name='Теги'),
+            field=models.ManyToManyField(
+                related_name='recipes', to='recipes.tag', verbose_name='Теги'),
         ),
         migrations.AlterField(
             model_name='recipe',
@@ -105,50 +121,60 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipeingredient',
             name='amount',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество'),
+            field=models.PositiveIntegerField(
+                validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество'),
         ),
         migrations.AlterField(
             model_name='recipeingredient',
             name='ingredient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient', verbose_name='Ингредиент'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    to='recipes.ingredient', verbose_name='Ингредиент'),
         ),
         migrations.AlterField(
             model_name='recipeingredient',
             name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.recipe', verbose_name='Рецепт'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='recipe_ingredients', to='recipes.recipe', verbose_name='Рецепт'),
         ),
         migrations.AlterField(
             model_name='shoppingcart',
             name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_shopping_cart', to='recipes.recipe', verbose_name='Рецепт'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='in_shopping_cart', to='recipes.recipe', verbose_name='Рецепт'),
         ),
         migrations.AlterField(
             model_name='shoppingcart',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='shopping_cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
         ),
         migrations.AlterField(
             model_name='subscription',
             name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscribers', to=settings.AUTH_USER_MODEL, verbose_name='Автор'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='subscribers', to=settings.AUTH_USER_MODEL, verbose_name='Автор'),
         ),
         migrations.AlterField(
             model_name='subscription',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to=settings.AUTH_USER_MODEL, verbose_name='Подписчик'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='subscriptions', to=settings.AUTH_USER_MODEL, verbose_name='Подписчик'),
         ),
         migrations.AlterField(
             model_name='tag',
             name='name',
-            field=models.CharField(max_length=32, unique=True, verbose_name='Название'),
+            field=models.CharField(
+                max_length=32, unique=True, verbose_name='Название'),
         ),
         migrations.AlterField(
             model_name='tag',
             name='slug',
-            field=models.SlugField(max_length=32, unique=True, verbose_name='Слаг'),
+            field=models.SlugField(
+                max_length=32, unique=True, verbose_name='Слаг'),
         ),
         migrations.AddConstraint(
             model_name='subscription',
-            constraint=models.CheckConstraint(condition=models.Q(('user__exact', models.F('author')), _negated=True), name='no_self_subscription'),
+            constraint=models.CheckConstraint(condition=models.Q(
+                ('user__exact', models.F('author')), _negated=True), name='no_self_subscription'),
         ),
     ]
