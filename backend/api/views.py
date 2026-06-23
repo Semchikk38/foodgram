@@ -130,8 +130,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Список покупок пуст.'},
                             status=status.HTTP_404_NOT_FOUND)
 
-        cart_recipe_ids = ShoppingCart.objects.filter(
-            user=user).values_list('recipe', flat=True)
         ingredients = (
             RecipeIngredient.objects .filter(
                 recipe__in_shopping_cart__user=user) .values(
