@@ -146,9 +146,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
+                user_id = self.context["request"].user.id
+                timestamp = int(time.time())
+                filename = f'recipe_{user_id}_{timestamp}.{ext}'
                 validated_data['image'] = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f'recipe_{self.context["request"].user.id}_{int(time.time())}.{ext}'
+                    name=filename
                 )
             except (ValueError, TypeError):
                 pass
@@ -178,7 +181,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         if ingredients_data is not None:
             existing = {
-                ri.ingredient_id: ri for ri in instance.recipe_ingredients.all()}
+                ri.ingredient_id: ri
+                for ri in instance.recipe_ingredients.all()
+            }
             new_ids = set()
 
             for ingr_data in ingredients_data:

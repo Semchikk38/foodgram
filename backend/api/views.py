@@ -143,12 +143,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output = io.StringIO()
         output.write('Список покупок:\n\n')
         for item in ingredients:
-            output.write(
-                f"{
-                    item['ingredient__name']} ({
-                    item['ingredient__measurement_unit']}) — {
-                    item['total_amount']}\n"
-            )
+            name = item['ingredient__name']
+            unit = item['ingredient__measurement_unit']
+            amount = item['total_amount']
+            output.write(f"{name} ({unit}) — {amount}\n")
 
         response = HttpResponse(output.getvalue(), content_type='text/plain')
         response['Content-Disposition'] = (
@@ -206,8 +204,9 @@ class CustomUserViewSet(DjoserUserViewSet):
 
         if request.method == 'POST':
             if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'detail': 'Вы уже подписаны на этого автора.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого автора.'},
+                    status=status.HTTP_400_BAD_REQUEST)
             Subscription.objects.create(user=user, author=author)
             serializer = UserWithRecipesSerializer(
                 author, context={'request': request})
@@ -230,7 +229,9 @@ class CustomUserViewSet(DjoserUserViewSet):
 
         if avatar_file:
             user.avatar.save(avatar_file.name, avatar_file, save=True)
-        elif avatar_data and isinstance(avatar_data, str) and avatar_data.startswith('data:image'):
+        elif avatar_data and isinstance(
+            avatar_data, str
+        ) and avatar_data.startswith('data:image'):
             try:
                 format, imgstr = avatar_data.split(';base64,')
                 ext = format.split('/')[-1]
