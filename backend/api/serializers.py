@@ -142,11 +142,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         image_data = validated_data.pop('image', None)
+
         if image_data:
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
-                user_id = self.context["request"].user.id
+                user_id = self.context["request"].user.i
                 timestamp = int(time.time())
                 filename = f'recipe_{user_id}_{timestamp}.{ext}'
                 validated_data['image'] = ContentFile(
@@ -155,23 +156,37 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 )
             except (ValueError, TypeError):
                 pass
+
         author = kwargs.get('author') or self.context['request'].user
         validated_data['author'] = author
+
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
+
         for ingr in ingredients_data:
+            amount = ingr.get('amount', 0)
+            if not ingr.get('id'):
+                continue
+            try:
+                amount = int(amount)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError("Количество должно быть числом")
+            if amount <= 0:
+                raise serializers.ValidationError(
+                    "Количество ингредиента должно быть больше 0"
+                )
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient_id=ingr['id'],
-                amount=ingr['amount']
+                amount=amount
             )
+
         return recipe
 
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
         image_data = validated_data.pop('image', None)
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -191,9 +206,15 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 amount = ingr_data.get('amount', 0)
                 if not ing_id:
                     continue
+
+                try:
+                    amount = int(amount)
+                except (TypeError, ValueError):
+                    raise serializers.ValidationError("Количество должно быть числом")
                 if amount <= 0:
                     raise serializers.ValidationError(
-                        "Количество ингредиента должно быть больше 0")
+                        "Количество ингредиента должно быть больше 0"
+                    )
                 new_ids.add(ing_id)
                 if ing_id in existing:
                     ri = existing[ing_id]
@@ -209,18 +230,18 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             for ing_id, ri in existing.items():
                 if ing_id not in new_ids:
                     ri.delete()
-
         if image_data:
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
+                timestamp = int(time.time())
+                filename = f'recipe_{instance.id}_{timestamp}.{ext}'
                 instance.image = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f'recipe_{instance.id}_{int(time.time())}.{ext}'
+                    name=filename
                 )
             except (ValueError, TypeError):
                 instance.image = image_data
-
         instance.save()
         return instance
 
