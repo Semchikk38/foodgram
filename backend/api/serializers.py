@@ -170,7 +170,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 amount = int(amount)
             except (TypeError, ValueError):
-                raise serializers.ValidationError("Количество должно быть числом")
+                raise serializers.ValidationError(
+                    "Количество должно быть числом"
+                )
             if amount <= 0:
                 raise serializers.ValidationError(
                     "Количество ингредиента должно быть больше 0"
@@ -210,7 +212,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 try:
                     amount = int(amount)
                 except (TypeError, ValueError):
-                    raise serializers.ValidationError("Количество должно быть числом")
+                    raise serializers.ValidationError(
+                        "Количество должно быть числом"
+                    )
                 if amount <= 0:
                     raise serializers.ValidationError(
                         "Количество ингредиента должно быть больше 0"
