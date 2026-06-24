@@ -156,14 +156,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         short_id = recipe.pk
-        return Response(
-            {'short-link': f'https://{request.get_host()}/s/{short_id}'})
-
+        return Response({
+            'short-link': request.build_absolute_uri(f'/s/{short_id}')
+        })
 
 class ShortLinkView(View):
     def get(self, request, short_id):
         recipe = get_object_or_404(Recipe, pk=short_id)
-        return redirect(f'https://{request.get_host()}/recipes/{recipe.pk}/')
+        return redirect(request.build_absolute_uri(f'/recipes/{recipe.pk}/'))
 
 
 class CustomUserViewSet(DjoserUserViewSet):
@@ -247,5 +247,13 @@ class CustomUserViewSet(DjoserUserViewSet):
         serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data)
 
+    @action(detail=False, methods=['delete'], url_path='avatar')
+    def delete_avatar(self, request):
+        user = request.user
+        if user.avatar:
+            user.avatar.delete()
+            user.avatar = None
+            user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 ShortLinkRedirectView = ShortLinkView

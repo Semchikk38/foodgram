@@ -7,13 +7,19 @@ router = DefaultRouter()
 router.register('ingredients', IngredientViewSet)
 router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet, basename='recipe')
-router.register('users', CustomUserViewSet, basename='users')
+#router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
-    path('users/avatar/',
-         CustomUserViewSet.as_view({'patch': 'avatar'}), name='user-avatar'),
-    path('users/me/avatar/', CustomUserViewSet.as_view(
-        {'patch': 'avatar', 'put': 'avatar'}), name='user-avatar-me'),
+    path('users/avatar/', CustomUserViewSet.as_view({
+        'patch': 'avatar',
+        'put': 'avatar',
+        'delete': 'delete_avatar'
+    }), name='user-avatar'),
+    path('users/me/avatar/', CustomUserViewSet.as_view({
+        'patch': 'avatar',
+        'put': 'avatar',
+        'delete': 'delete_avatar'
+    }), name='user-avatar-me'),
     path('users/subscriptions/',
          CustomUserViewSet.as_view({'get': 'subscriptions'}),
          name='user-subscriptions'),

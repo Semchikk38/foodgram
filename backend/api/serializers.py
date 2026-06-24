@@ -103,11 +103,18 @@ class RecipeSerializer(serializers.ModelSerializer):
         return value
 
 
+class IngredientCreateSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField(min_value=1)
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Количество должно быть больше 0")
+        return value
+
+
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
-    ingredients = serializers.ListField(
-        child=serializers.DictField(),
-        write_only=True
-    )
+    ingredients = IngredientCreateSerializer(many=True, write_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
@@ -147,7 +154,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
-                user_id = self.context["request"].user.i
+                user_id = self.context["request"].user.id
                 timestamp = int(time.time())
                 filename = f'recipe_{user_id}_{timestamp}.{ext}'
                 validated_data['image'] = ContentFile(
@@ -170,9 +177,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 amount = int(amount)
             except (TypeError, ValueError):
-                raise serializers.ValidationError(
-                    "Количество должно быть числом"
-                )
+                raise serializers.ValidationError("Количество должно быть числом")
             if amount <= 0:
                 raise serializers.ValidationError(
                     "Количество ингредиента должно быть больше 0"
@@ -212,9 +217,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 try:
                     amount = int(amount)
                 except (TypeError, ValueError):
-                    raise serializers.ValidationError(
-                        "Количество должно быть числом"
-                    )
+                    raise serializers.ValidationError("Количество должно быть числом")
                 if amount <= 0:
                     raise serializers.ValidationError(
                         "Количество ингредиента должно быть больше 0"
@@ -273,6 +276,9 @@ class UserWithRecipesSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count')
 
+    def get_recipes(self, obj):
+        recipes = obj.recipes.all()[:3]
+        return RecipeMinifiedSerializer(recipes, many=True).data
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
