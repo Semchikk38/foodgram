@@ -160,6 +160,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'short-link': request.build_absolute_uri(f'/s/{short_id}')
         })
 
+
 class ShortLinkView(View):
     def get(self, request, short_id):
         recipe = get_object_or_404(Recipe, pk=short_id)
@@ -255,5 +256,6 @@ class CustomUserViewSet(DjoserUserViewSet):
             user.avatar = None
             user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 ShortLinkRedirectView = ShortLinkView

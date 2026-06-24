@@ -7,7 +7,6 @@ router = DefaultRouter()
 router.register('ingredients', IngredientViewSet)
 router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet, basename='recipe')
-#router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
     path('users/avatar/', CustomUserViewSet.as_view({

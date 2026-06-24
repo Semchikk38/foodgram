@@ -109,7 +109,9 @@ class IngredientCreateSerializer(serializers.Serializer):
 
     def validate_amount(self, value):
         if value <= 0:
-            raise serializers.ValidationError("Количество должно быть больше 0")
+            raise serializers.ValidationError(
+                "Количество должно быть больше 0"
+            )
         return value
 
 
@@ -177,7 +179,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 amount = int(amount)
             except (TypeError, ValueError):
-                raise serializers.ValidationError("Количество должно быть числом")
+                raise serializers.ValidationError(
+                    "Количество должно быть числом"
+                )
             if amount <= 0:
                 raise serializers.ValidationError(
                     "Количество ингредиента должно быть больше 0"
@@ -217,7 +221,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 try:
                     amount = int(amount)
                 except (TypeError, ValueError):
-                    raise serializers.ValidationError("Количество должно быть числом")
+                    raise serializers.ValidationError(
+                        "Количество должно быть числом"
+                    )
                 if amount <= 0:
                     raise serializers.ValidationError(
                         "Количество ингредиента должно быть больше 0"
@@ -279,6 +285,7 @@ class UserWithRecipesSerializer(UserSerializer):
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]
         return RecipeMinifiedSerializer(recipes, many=True).data
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
