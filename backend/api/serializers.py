@@ -279,7 +279,9 @@ class UserWithRecipesSerializer(UserSerializer):
     author_page_url = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count', 'author_page_url')
+        fields = UserSerializer.Meta.fields + (
+            'recipes', 'recipes_count', 'author_page_url'
+        )
 
     def get_recipes(self, obj):
         return RecipeMinifiedSerializer(obj.recipes.all()[:3], many=True).data
