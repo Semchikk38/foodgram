@@ -21,6 +21,7 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from users.models import Subscription, User
 
 from .permissions import IsAuthorOrReadOnly
@@ -76,7 +77,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post', 'delete'])
+    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
@@ -97,7 +98,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete'])
+    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         if request.method == 'POST':
@@ -159,7 +160,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response({
             'short-link': request.build_absolute_uri(f'/s/{short_id}')
         })
-
 
 class ShortLinkView(View):
     def get(self, request, short_id):
@@ -256,6 +256,5 @@ class CustomUserViewSet(DjoserUserViewSet):
             user.avatar = None
             user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 ShortLinkRedirectView = ShortLinkView

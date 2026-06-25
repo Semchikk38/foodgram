@@ -24,6 +24,10 @@ urlpatterns = [
          name='user-subscriptions'),
     path('s/<int:short_id>/', ShortLinkRedirectView.as_view(),
          name='short-link'),
+    path('users/<int:id>/subscribe/', CustomUserViewSet.as_view({
+        'post': 'subscribe',
+        'delete': 'subscribe'
+    }), name='user-subscribe'),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
     path('', include(router.urls)),
