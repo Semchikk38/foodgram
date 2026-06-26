@@ -109,7 +109,9 @@ class IngredientCreateSerializer(serializers.Serializer):
 
     def validate_amount(self, value):
         if value <= 0:
-            raise serializers.ValidationError("Количество должно быть больше 0")
+            raise serializers.ValidationError(
+                "Количество должно быть больше 0"
+            )
         return value
 
 
@@ -177,7 +179,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 amount = int(amount)
             except (TypeError, ValueError):
-                raise serializers.ValidationError("Количество должно быть числом")
+                raise serializers.ValidationError(
+                    "Количество должно быть числом"
+                )
             if amount <= 0:
                 raise serializers.ValidationError(
                     "Количество ингредиента должно быть больше 0"
@@ -211,9 +215,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 try:
                     amount = int(amount)
                 except (TypeError, ValueError):
-                    raise serializers.ValidationError("Количество должно быть числом")
+                    raise serializers.ValidationError(
+                        "Количество должно быть числом"
+                    )
                 if amount <= 0:
-                    raise serializers.ValidationError("Количество ингредиента должно быть больше 0")
+                    raise serializers.ValidationError(
+                        "Количество ингредиента должно быть больше 0"
+                    )
                 RecipeIngredient.objects.create(
                     recipe=instance,
                     ingredient_id=ing_id,
@@ -250,13 +258,18 @@ class SetAvatarSerializer(serializers.ModelSerializer):
         model = User
         fields = ('avatar',)
 
+
 class UserWithRecipesSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.IntegerField(source='recipes.count', read_only=True)
+    recipes_count = serializers.IntegerField(
+        source='recipes.count', read_only=True
+    )
     author_page_url = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count', 'author_page_url')
+        fields = UserSerializer.Meta.fields + (
+            'recipes', 'recipes_count', 'author_page_url'
+        )
 
     def get_recipes(self, obj):
         return RecipeMinifiedSerializer(obj.recipes.all()[:3], many=True).data
@@ -274,7 +287,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name')
+        fields = (
+            'id', 'username', 'email', 'password', 'first_name', 'last_name'
+        )
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
