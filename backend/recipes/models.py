@@ -1,8 +1,12 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-from recipes.constants import (MAX_INGREDIENT_NAME_LENGTH, MAX_NAME_LENGTH,
-                               MAX_TAG_NAME_LENGTH, MAX_UNIT_LENGTH)
+from recipes.constants import (
+    MAX_INGREDIENT_NAME_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_TAG_NAME_LENGTH,
+    MAX_UNIT_LENGTH,
+)
 from users.models import User
 
 

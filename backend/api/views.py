@@ -4,11 +4,16 @@ import time
 
 from api.filters import RecipeFilter
 from api.pagination import PageNumberPagination
-from api.serializers import (IngredientSerializer,
-                             RecipeCreateUpdateSerializer,
-                             RecipeListSerializer, RecipeMinifiedSerializer,
-                             SetAvatarSerializer, TagSerializer,
-                             UserSerializer, UserWithRecipesSerializer)
+from api.serializers import (
+    IngredientSerializer,
+    RecipeCreateUpdateSerializer,
+    RecipeListSerializer,
+    RecipeMinifiedSerializer,
+    SetAvatarSerializer,
+    TagSerializer,
+    UserSerializer,
+    UserWithRecipesSerializer,
+)
 from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -16,12 +21,18 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from users.models import Subscription, User
 
 from .permissions import IsAuthorOrReadOnly
