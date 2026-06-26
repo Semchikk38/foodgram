@@ -3,47 +3,53 @@ from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.CharFilter(field_name='tags__slug', method='filter_tags')
+    # Используем CharFilter вместо ModelMultipleChoiceFilter
+    # Метод filter_tags реализует логику ИЛИ вручную
+    tags = filters.CharFilter(method='filter_tags')
+    
     author = filters.NumberFilter(field_name='author__id')
+    
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')
-    is_in_shopping_cart = filters.BooleanFilter(
-        method='filter_is_in_shopping_cart')
+    is_in_shopping_cart = filters.BooleanFilter(method='filter_is_in_shopping_cart')
 
     class Meta:
         model = Recipe
         fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart')
 
     def filter_tags(self, queryset, name, value):
-        request = getattr(self, 'request', None)
-        if request:
-            slugs = request.query_params.getlist('tags')
-            if slugs:
-                existing_slugs = Tag.objects.filter(
-                    slug__in=slugs
-                ).values_list('slug', flat=True)
-                if set(slugs) - set(existing_slugs):
-                    return queryset.none()
-                for slug in slugs:
-                    queryset = queryset.filter(tags__slug=slug)
-                return queryset
-        return queryset
+        """
+        Фильтрация по тегам с логикой ИЛИ.
+        Получает список слагов из query_params и фильтрует рецепты,
+        у которых есть хотя бы один из этих тегов.
+        """
+        # Получаем все переданные теги (поддерживает ?tags=a&tags=b)
+        slugs = self.request.query_params.getlist('tags')
+        
+        if not slugs:
+            return queryset
+            
+        # Фильтруем только по существующим тегам, игнорируя несуществующие
+        valid_slugs = Tag.objects.filter(slug__in=slugs).values_list('slug', flat=True)
+        
+        if not valid_slugs:
+            # Если ни один тег не найден, возвращаем пустой queryset
+            return queryset.none()
+            
+        # Логика ИЛИ: рецепты, у которых есть хотя бы один из валидных тегов
+        return queryset.filter(tags__slug__in=valid_slugs).distinct()
 
     def filter_is_favorited(self, queryset, name, value):
         if not value:
             return queryset
-        user = getattr(self.request, 'user', None) if hasattr(
-            self, 'request'
-        ) else None
-        if user and user.is_authenticated:
+        user = self.request.user
+        if user.is_authenticated:
             return queryset.filter(favorites__user=user)
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         if not value:
             return queryset
-        user = getattr(self.request, 'user', None) if hasattr(
-            self, 'request'
-        ) else None
-        if user and user.is_authenticated:
+        user = self.request.user
+        if user.is_authenticated:
             return queryset.filter(in_shopping_cart__user=user)
         return queryset
