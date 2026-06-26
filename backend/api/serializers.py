@@ -149,9 +149,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
-                filename = f'recipe_{self.context["request"].user.id}_{int(
-                    time.time()
-                )}.{ext}'
+                user_id = self.context["request"].user.id
+                timestamp = int(time.time())
+                filename = f'recipe_{user_id}_{timestamp}.{ext}'
                 validated_data['image'] = ContentFile(
                     base64.b64decode(imgstr), name=filename
                 )
