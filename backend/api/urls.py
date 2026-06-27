@@ -1,12 +1,7 @@
-from api.views import (
-    CustomUserViewSet,
-    IngredientViewSet,
-    RecipeViewSet,
-    ShortLinkRedirectView,
-    TagViewSet,
-)
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
+from api.views import IngredientViewSet, RecipeViewSet, ShortLinkView, TagViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register('ingredients', IngredientViewSet)
@@ -14,26 +9,32 @@ router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet, basename='recipe')
 
 urlpatterns = [
-    path('users/avatar/', CustomUserViewSet.as_view({
+    # Явные маршруты для пользователей (должны быть до router.urls)
+    path('users/me/', UserViewSet.as_view({'get': 'me'}), name='user-me'),
+    path('users/avatar/', UserViewSet.as_view({
         'patch': 'avatar',
         'put': 'avatar',
         'delete': 'delete_avatar'
     }), name='user-avatar'),
-    path('users/me/avatar/', CustomUserViewSet.as_view({
+    path('users/me/avatar/', UserViewSet.as_view({
         'patch': 'avatar',
         'put': 'avatar',
         'delete': 'delete_avatar'
-    }), name='user-avatar-me'),
+    }), name='user-me-avatar'),
     path('users/subscriptions/',
-         CustomUserViewSet.as_view({'get': 'subscriptions'}),
-         name='user-subscriptions'),
-    path('s/<int:short_id>/', ShortLinkRedirectView.as_view(),
-         name='short-link'),
-    path('users/<int:id>/subscribe/', CustomUserViewSet.as_view({
+         UserViewSet.as_view({'get': 'subscriptions'}), name='user-subscriptions'),
+    path('users/<int:id>/subscribe/', UserViewSet.as_view({
         'post': 'subscribe',
-        'delete': 'subscribe'
+        'delete': 'delete_subscribe'
     }), name='user-subscribe'),
+
+    # Djoser (регистрация, логин, токен)
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
+
+    # Короткая ссылка
+    path('s/<int:short_id>/', ShortLinkView.as_view(), name='short-link'),
+
+    # Остальные роуты (ингредиенты, теги, рецепты)
     path('', include(router.urls)),
 ]

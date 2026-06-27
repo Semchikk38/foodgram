@@ -3,12 +3,23 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import Subscription, User
 
-# Регистрируем модель User с стандартным UserAdmin
-admin.site.register(User, UserAdmin)
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'recipes_count', 'followers_count')
+    search_fields = ('username', 'email')
+    list_filter = ('is_active', 'is_staff')
+
+    def recipes_count(self, obj):
+        return obj.recipes.count()
+    recipes_count.short_description = 'Рецептов'
+
+    def followers_count(self, obj):
+        return obj.following.count()
+    followers_count.short_description = 'Подписчиков'
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'author', 'created_at')
+    list_display = ('user', 'author')
     search_fields = ('user__email', 'author__email')
-    list_filter = ('created_at',)

@@ -3,14 +3,11 @@ from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    avatar = models.ImageField(
-        upload_to='users/avatars/',
-        blank=True,
-        null=True)
-
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
+
+    email = models.EmailField(unique=True)
+    avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True)
 
     class Meta:
         ordering = ('username',)
@@ -34,10 +31,9 @@ class Subscription(models.Model):
         related_name='following',
         verbose_name='Автор'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ('-created_at',)
+        ordering = ('-id',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
@@ -52,4 +48,4 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user} подписан на {self.author}'
+        return f'{self.user} → {self.author}'
