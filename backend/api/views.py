@@ -1,5 +1,6 @@
 import io
-from django.db.models import Exists, OuterRef, Sum, Value, BooleanField, Count, Prefetch
+from django.db.models import (Exists, OuterRef, Sum, Value,
+                              BooleanField, Count, Prefetch)
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
