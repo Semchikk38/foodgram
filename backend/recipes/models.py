@@ -125,7 +125,9 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self):
-        return f'{self.ingredient.name[:15]} – {self.amount} {self.ingredient.measurement_unit[:5]}'
+        name = self.ingredient.name[:15]
+        unit = self.ingredient.measurement_unit[:5]
+        return f'{name} – {self.amount} {unit}'
 
 
 class BaseFavoriteShopping(models.Model):

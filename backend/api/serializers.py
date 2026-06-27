@@ -160,9 +160,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['user'] == data['author']:
             raise serializers.ValidationError('Нельзя подписаться на себя')
-        if Subscription.objects.filter(user=data['user'], author=data['author']).exists():
+        if Subscription.objects.filter(user=data['user'],
+                                       author=data['author']).exists():
             raise serializers.ValidationError('Подписка уже существует')
         return data
 
     def to_representation(self, instance):
-        return UserWithRecipesSerializer(instance.author, context=self.context).data
+        return UserWithRecipesSerializer(instance.author,
+                                         context=self.context).data
