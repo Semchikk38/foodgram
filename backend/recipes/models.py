@@ -150,7 +150,10 @@ class BaseFavoriteShopping(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user} → {self.recipe.name[:15]} ({self._meta.verbose_name})'
+        return (
+            f'{self.user} → {self.recipe.name[:15]} '
+            f'({self._meta.verbose_name})'
+        )
 
 
 class Favorite(BaseFavoriteShopping):
