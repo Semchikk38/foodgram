@@ -7,8 +7,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(
-        upload_to='users/avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True)
 
     class Meta:
         ordering = ('username',)
@@ -37,7 +36,7 @@ class Subscription(models.Model):
         ordering = ('-id',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=('user', 'author'),
                 name='unique_subscription'
@@ -45,8 +44,8 @@ class Subscription(models.Model):
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),
                 name='no_self_subscription'
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return f'{self.user} → {self.author}'

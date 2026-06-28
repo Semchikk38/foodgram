@@ -1,12 +1,10 @@
 from django.core.validators import MinValueValidator
-
 from django.db import models
 
 from recipes.constants import (
     MAX_INGREDIENT_NAME_LENGTH,
     MAX_RECIPE_NAME_LENGTH,
     MAX_TAG_NAME_LENGTH,
-    MAX_TEXT_LENGTH,
     MAX_UNIT_LENGTH,
 )
 from users.models import User
@@ -47,12 +45,12 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
                 name='unique_name_unit'
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return f'{self.name[:20]} ({self.measurement_unit[:10]})'
@@ -74,7 +72,6 @@ class Recipe(models.Model):
         verbose_name='Изображение'
     )
     text = models.TextField(
-        max_length=MAX_TEXT_LENGTH,
         verbose_name='Описание'
     )
     ingredients = models.ManyToManyField(
@@ -88,7 +85,7 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
+        validators=(MinValueValidator(1),),
         verbose_name='Время приготовления (мин)'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -115,7 +112,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
+        validators=(MinValueValidator(1),),
         verbose_name='Количество'
     )
 
@@ -144,34 +141,25 @@ class BaseFavoriteShopping(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ('-id',)
+        ordering = ('-created_at',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s_unique'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.user} → {self.recipe.name[:15]} ({self._meta.verbose_name})'
 
 
 class Favorite(BaseFavoriteShopping):
     class Meta(BaseFavoriteShopping.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_favorite'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} → {self.recipe.name[:15]}'
 
 
 class ShoppingCart(BaseFavoriteShopping):
     class Meta(BaseFavoriteShopping.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_shopping_cart'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} → {self.recipe.name[:15]}'
