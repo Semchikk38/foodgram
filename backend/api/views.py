@@ -2,7 +2,6 @@ import io
 
 from django.db import models
 from django.db.models import Count, Exists, OuterRef, Sum, Value
-from django.db.models.functions import Coalesce
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
