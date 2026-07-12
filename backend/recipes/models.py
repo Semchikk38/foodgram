@@ -56,7 +56,9 @@ class Ingredient(models.Model):
         )
 
     def __str__(self):
-        return f'{self.name[:MAX_STR_DISPLAY_LENGTH]} ({self.measurement_unit[:MAX_UNIT_STR_LENGTH]})'
+        name = self.name[:MAX_STR_DISPLAY_LENGTH]
+        unit = self.measurement_unit[:MAX_UNIT_STR_LENGTH]
+        return f'{name} ({unit})'
 
 
 class Recipe(models.Model):

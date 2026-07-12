@@ -35,7 +35,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
@@ -58,7 +59,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True, default=False)
 
     class Meta:
         model = Recipe
@@ -78,7 +80,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
+        fields = ('id', 'tags', 'ingredients', 'name',
+                  'image', 'text', 'cooking_time')
 
     def validate(self, data):
         if not data.get('tags'):
@@ -101,7 +104,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         RecipeIngredient.objects.bulk_create(
             RecipeIngredient(
                 recipe=recipe,
-                ingredient_id=item['id'].id,  # извлекаем ID из объекта Ingredient
+                ingredient_id=item['id'].id,
                 amount=item['amount']
             ) for item in ingredients_data
         )
@@ -155,7 +158,8 @@ class UserWithRecipesSerializer(UserSerializer):
     author_page_url = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count', 'author_page_url')
+        fields = UserSerializer.Meta.fields + (
+            'recipes', 'recipes_count', 'author_page_url')
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -168,7 +172,8 @@ class UserWithRecipesSerializer(UserSerializer):
         queryset = obj.recipes.all()
         if limit is not None:
             queryset = queryset[:limit]
-        return RecipeMinifiedSerializer(queryset, many=True, context=self.context).data
+        return RecipeMinifiedSerializer(
+            queryset, many=True, context=self.context).data
 
     def get_author_page_url(self, obj):
         return f'/authors/{obj.id}/'

@@ -7,7 +7,8 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='users/avatars/',
+                               blank=True, null=True)
 
     class Meta:
         ordering = ('username',)
