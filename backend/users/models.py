@@ -7,8 +7,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(
-        upload_to='users/avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True)
 
     class Meta:
         ordering = ('username',)
@@ -23,13 +22,13 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
+        related_name='subscriptions',
         verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
+        related_name='subscribers',
         verbose_name='Автор'
     )
 

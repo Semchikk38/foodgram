@@ -6,6 +6,9 @@ from recipes.constants import (
     MAX_RECIPE_NAME_LENGTH,
     MAX_TAG_NAME_LENGTH,
     MAX_UNIT_LENGTH,
+    MAX_STR_DISPLAY_LENGTH,
+    MAX_INGREDIENT_STR_LENGTH,
+    MAX_UNIT_STR_LENGTH,
 )
 from users.models import User
 
@@ -28,7 +31,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.name[:20]
+        return self.name[:MAX_STR_DISPLAY_LENGTH]
 
 
 class Ingredient(models.Model):
@@ -53,7 +56,7 @@ class Ingredient(models.Model):
         )
 
     def __str__(self):
-        return f'{self.name[:20]} ({self.measurement_unit[:10]})'
+        return f'{self.name[:MAX_STR_DISPLAY_LENGTH]} ({self.measurement_unit[:MAX_UNIT_STR_LENGTH]})'
 
 
 class Recipe(models.Model):
@@ -96,7 +99,7 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
-        return self.name[:20]
+        return self.name[:MAX_STR_DISPLAY_LENGTH]
 
 
 class RecipeIngredient(models.Model):
@@ -122,8 +125,8 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self):
-        name = self.ingredient.name[:15]
-        unit = self.ingredient.measurement_unit[:5]
+        name = self.ingredient.name[:MAX_INGREDIENT_STR_LENGTH]
+        unit = self.ingredient.measurement_unit[:MAX_UNIT_STR_LENGTH]
         return f'{name} – {self.amount} {unit}'
 
 
@@ -138,6 +141,7 @@ class BaseFavoriteShopping(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -151,7 +155,7 @@ class BaseFavoriteShopping(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user} → {self.recipe.name[:15]} '
+            f'{self.user} → {self.recipe.name[:MAX_STR_DISPLAY_LENGTH]} '
             f'({self._meta.verbose_name})'
         )
 
