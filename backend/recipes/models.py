@@ -157,7 +157,9 @@ class BaseFavoriteShopping(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user} → {self.recipe.name[:MAX_STR_DISPLAY_LENGTH]} ({self._meta.verbose_name})'
+        recipe_name = self.recipe.name[:MAX_STR_DISPLAY_LENGTH]
+        verbose_name = self._meta.verbose_name
+        return f'{self.user} → {recipe_name} ({verbose_name})'
 
 
 class Favorite(BaseFavoriteShopping):

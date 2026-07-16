@@ -38,7 +38,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
@@ -49,7 +50,11 @@ class IngredientWriteSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
         min_value=MIN_INGREDIENT_AMOUNT,
-        error_messages={'min_value': f'Количество должно быть больше {MIN_INGREDIENT_AMOUNT - 1}'}
+        error_messages={
+            'min_value': (
+                f'Количество должно быть больше {MIN_INGREDIENT_AMOUNT - 1}'
+            )
+        }
     )
 
 
@@ -61,7 +66,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True, default=False)
 
     class Meta:
         model = Recipe
@@ -81,7 +87,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
+        fields = ('id', 'tags', 'ingredients', 'name',
+                  'image', 'text', 'cooking_time')
 
     def validate(self, data):
         if not data.get('tags'):
@@ -179,7 +186,8 @@ class UserWithRecipesSerializer(UserSerializer):
         queryset = obj.recipes.all()
         if limit is not None:
             queryset = queryset[:limit]
-        return RecipeMinifiedSerializer(queryset, many=True, context=self.context).data
+        return RecipeMinifiedSerializer(queryset, many=True,
+                                        context=self.context).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

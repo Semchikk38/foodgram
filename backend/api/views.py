@@ -10,7 +10,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -28,7 +27,8 @@ from api.serializers import (
     UserSerializer,
     UserWithRecipesSerializer,
 )
-from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import Subscription, User
 
 
@@ -65,13 +65,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     Favorite.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
                 is_in_shopping_cart=Exists(
-                    ShoppingCart.objects.filter(user=user, recipe=OuterRef('pk'))
+                    ShoppingCart.objects.filter(user=user,
+                                                recipe=OuterRef('pk'))
                 ),
             )
         else:
             queryset = queryset.annotate(
                 is_favorited=Value(False, output_field=models.BooleanField()),
-                is_in_shopping_cart=Value(False, output_field=models.BooleanField()),
+                is_in_shopping_cart=Value(
+                    False, output_field=models.BooleanField()),
             )
         return queryset
 
@@ -122,7 +124,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             delete=True
         )
 
-    def _manage_relation(self, request, pk, model, exists_msg, not_exists_msg, delete=False):
+    def _manage_relation(self, request, pk, model, exists_msg,
+                         not_exists_msg, delete=False):
         recipe = get_object_or_404(Recipe, pk=pk)
         if delete:
             deleted, _ = model.objects.filter(
@@ -152,13 +155,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        ingredients = (
-            RecipeIngredient.objects
-            .filter(recipe__in_shopping_cart__user=request.user)
-            .values('ingredient__name', 'ingredient__measurement_unit')
-            .annotate(total_amount=Sum('amount'))
-            .order_by('ingredient__name')
-        )
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__in_shopping_cart__user=request.user
+        ).values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(
+            total_amount=Sum('amount')
+        ).order_by('ingredient__name')
         if not ingredients:
             return Response(
                 {'detail': 'Список покупок пуст'},
@@ -170,7 +173,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             io.BytesIO(content.encode('utf-8')),
             content_type='text/plain; charset=utf-8'
         )
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt')
         return response
 
     @staticmethod
@@ -209,7 +213,8 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=('get',), permission_classes=(
+            IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
