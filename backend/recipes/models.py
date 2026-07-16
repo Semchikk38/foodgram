@@ -9,6 +9,8 @@ from recipes.constants import (
     MAX_STR_DISPLAY_LENGTH,
     MAX_INGREDIENT_STR_LENGTH,
     MAX_UNIT_STR_LENGTH,
+    MIN_COOKING_TIME,
+    MIN_INGREDIENT_AMOUNT,
 )
 from users.models import User
 
@@ -90,7 +92,7 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(MIN_COOKING_TIME),),
         verbose_name='Время приготовления (мин)'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -117,7 +119,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(MIN_INGREDIENT_AMOUNT),),
         verbose_name='Количество'
     )
 
@@ -143,11 +145,10 @@ class BaseFavoriteShopping(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
-        ordering = ('-created_at',)
+        ordering = ('-id',)
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
@@ -156,10 +157,7 @@ class BaseFavoriteShopping(models.Model):
         )
 
     def __str__(self):
-        return (
-            f'{self.user} → {self.recipe.name[:MAX_STR_DISPLAY_LENGTH]} '
-            f'({self._meta.verbose_name})'
-        )
+        return f'{self.user} → {self.recipe.name[:MAX_STR_DISPLAY_LENGTH]} ({self._meta.verbose_name})'
 
 
 class Favorite(BaseFavoriteShopping):

@@ -14,7 +14,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import PageNumberPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (
@@ -28,8 +28,7 @@ from api.serializers import (
     UserSerializer,
     UserWithRecipesSerializer,
 )
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
+from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 from users.models import Subscription, User
 
 
@@ -45,15 +44,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (permissions.AllowAny,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('^name',)
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        name = self.request.query_params.get('name')
-        if name:
-            queryset = queryset.filter(name__istartswith=name)
-        return queryset
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -64,24 +56,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = getattr(self.request, 'user', None)
-        queryset = Recipe.objects.select_related(
-            'author'
-        ).prefetch_related('tags', 'recipe_ingredients')
+        queryset = Recipe.objects.select_related('author').prefetch_related(
+            'tags', 'recipe_ingredients'
+        )
         if user and user.is_authenticated:
             queryset = queryset.annotate(
                 is_favorited=Exists(
                     Favorite.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
                 is_in_shopping_cart=Exists(
-                    ShoppingCart.objects.filter(
-                        user=user, recipe=OuterRef('pk'))
+                    ShoppingCart.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
             )
         else:
             queryset = queryset.annotate(
                 is_favorited=Value(False, output_field=models.BooleanField()),
-                is_in_shopping_cart=Value(
-                    False, output_field=models.BooleanField()),
+                is_in_shopping_cart=Value(False, output_field=models.BooleanField()),
             )
         return queryset
 
@@ -132,8 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             delete=True
         )
 
-    def _manage_relation(self, request, pk, model,
-                         exists_msg, not_exists_msg, delete=False):
+    def _manage_relation(self, request, pk, model, exists_msg, not_exists_msg, delete=False):
         recipe = get_object_or_404(Recipe, pk=pk)
         if delete:
             deleted, _ = model.objects.filter(
@@ -181,8 +170,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             io.BytesIO(content.encode('utf-8')),
             content_type='text/plain; charset=utf-8'
         )
-        response['Content-Disposition'] = (
-            'attachment; filename=shopping_list.txt')
+        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
         return response
 
     @staticmethod
@@ -193,7 +181,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             name = item['ingredient__name']
             unit = item['ingredient__measurement_unit']
             amount = item['total_amount']
-            output.write(f"{name} ({unit}) — {amount}\n")
+            output.write(f'{name} ({unit}) — {amount}\n')
         return output.getvalue()
 
     @action(detail=True, methods=('get',), url_path='get-link')
@@ -221,8 +209,7 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @action(detail=False, methods=('get',),
-            permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
@@ -235,7 +222,7 @@ class UserViewSet(DjoserUserViewSet):
     def subscriptions(self, request):
         authors = (
             User.objects
-            .filter(subscribers__user=request.user)
+            .filter(subscriptions__user=request.user)
             .annotate(recipes_count=Count('recipes'))
             .order_by('recipes_count')
         )
@@ -278,16 +265,10 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=False,
-        methods=('patch', 'put', 'delete'),
+        methods=('patch', 'put'),
         permission_classes=(IsAuthenticated,)
     )
     def avatar(self, request):
-        if request.method == 'DELETE':
-            request.user.avatar.delete(save=False)
-            request.user.avatar = None
-            request.user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
         serializer = SetAvatarSerializer(
             request.user,
             data=request.data,
@@ -299,26 +280,22 @@ class UserViewSet(DjoserUserViewSet):
             UserSerializer(request.user, context={'request': request}).data
         )
 
+    @avatar.mapping.delete
+    def delete_avatar(self, request):
+        request.user.avatar.delete(save=False)
+        request.user.avatar = None
+        request.user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(
         detail=False,
-        methods=('patch', 'put', 'delete'),
+        methods=('patch', 'put'),
         permission_classes=(IsAuthenticated,),
         url_path='me/avatar'
     )
     def me_avatar(self, request):
-        if request.method == 'DELETE':
-            request.user.avatar.delete(save=False)
-            request.user.avatar = None
-            request.user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.avatar(request)
 
-        serializer = SetAvatarSerializer(
-            request.user,
-            data=request.data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            UserSerializer(request.user, context={'request': request}).data
-        )
+    @me_avatar.mapping.delete
+    def delete_me_avatar(self, request):
+        return self.delete_avatar(request)
