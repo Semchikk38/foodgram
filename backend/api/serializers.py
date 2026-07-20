@@ -52,9 +52,10 @@ class IngredientWriteSerializer(serializers.Serializer):
     amount = serializers.IntegerField(
         min_value=MIN_INGREDIENT_AMOUNT,
         error_messages={
-            'min_value': f'Количество должно быть больше {
-                MIN_INGREDIENT_AMOUNT - 1
-            }'
+            'min_value': (
+                f'Количество должно быть больше '
+                f'{MIN_INGREDIENT_AMOUNT - 1}'
+            )
         }
     )
 
