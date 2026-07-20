@@ -19,7 +19,7 @@ class UserSerializer(DjoserUserSerializer):
         return (
             request
             and request.user.is_authenticated
-            and obj.author_subscriptions.filter(user=request.user).exists()
+            and obj.subscriptions_to_the_author.filter(user=request.user).exists()
         )
 
 
@@ -38,8 +38,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredient.measurement_unit')
+    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
@@ -50,11 +49,7 @@ class IngredientWriteSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
         min_value=MIN_INGREDIENT_AMOUNT,
-        error_messages={
-            'min_value': (
-                f'Количество должно быть больше {MIN_INGREDIENT_AMOUNT - 1}'
-            )
-        }
+        error_messages={'min_value': f'Количество должно быть больше {MIN_INGREDIENT_AMOUNT - 1}'}
     )
 
 
@@ -66,8 +61,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(
-        read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(read_only=True, default=False)
 
     class Meta:
         model = Recipe
@@ -87,8 +81,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
+        fields = ('id', 'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
 
     def validate(self, data):
         if not data.get('tags'):
@@ -131,15 +124,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
-        image_data = validated_data.pop('image', None)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        if image_data:
-            instance.image = image_data
-
-        instance.save()
+        instance = super().update(instance, validated_data)
 
         if tags:
             instance.tags.set(tags)
@@ -183,11 +169,8 @@ class UserWithRecipesSerializer(UserSerializer):
                 limit = int(request.query_params['recipes_limit'])
             except ValueError:
                 pass
-        queryset = obj.recipes.all()
-        if limit is not None:
-            queryset = queryset[:limit]
-        return RecipeMinifiedSerializer(queryset, many=True,
-                                        context=self.context).data
+        queryset = obj.recipes.all()[:limit]
+        return RecipeMinifiedSerializer(queryset, many=True, context=self.context).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

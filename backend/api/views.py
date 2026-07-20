@@ -27,8 +27,7 @@ from api.serializers import (
     UserSerializer,
     UserWithRecipesSerializer,
 )
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
+from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 from users.models import Subscription, User
 
 
@@ -65,15 +64,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     Favorite.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
                 is_in_shopping_cart=Exists(
-                    ShoppingCart.objects.filter(user=user,
-                                                recipe=OuterRef('pk'))
+                    ShoppingCart.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
             )
         else:
             queryset = queryset.annotate(
                 is_favorited=Value(False, output_field=models.BooleanField()),
-                is_in_shopping_cart=Value(
-                    False, output_field=models.BooleanField()),
+                is_in_shopping_cart=Value(False, output_field=models.BooleanField()),
             )
         return queryset
 
@@ -88,20 +85,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk=None):
-        return self._manage_relation(
-            request, pk, Favorite,
-            'Рецепт уже в избранном',
-            'Рецепта нет в избранном'
-        )
+        return self._manage_relation(request, pk, Favorite)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        return self._manage_relation(
-            request, pk, Favorite,
-            'Рецепт уже в избранном',
-            'Рецепта нет в избранном',
-            delete=True
-        )
+        return self._manage_relation(request, pk, Favorite, delete=True)
 
     @action(
         detail=True,
@@ -109,23 +97,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk=None):
-        return self._manage_relation(
-            request, pk, ShoppingCart,
-            'Рецепт уже в списке покупок',
-            'Рецепта нет в списке покупок'
-        )
+        return self._manage_relation(request, pk, ShoppingCart)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
-        return self._manage_relation(
-            request, pk, ShoppingCart,
-            'Рецепт уже в списке покупок',
-            'Рецепта нет в списке покупок',
-            delete=True
-        )
+        return self._manage_relation(request, pk, ShoppingCart, delete=True)
 
-    def _manage_relation(self, request, pk, model, exists_msg,
-                         not_exists_msg, delete=False):
+    def _manage_relation(self, request, pk, model, delete=False):
         recipe = get_object_or_404(Recipe, pk=pk)
         if delete:
             deleted, _ = model.objects.filter(
@@ -133,14 +111,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).delete()
             if not deleted:
                 return Response(
-                    {'detail': not_exists_msg},
+                    {'detail': 'Объект не найден'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         if model.objects.filter(user=request.user, recipe=recipe).exists():
             return Response(
-                {'detail': exists_msg},
+                {'detail': 'Объект уже существует'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         model.objects.create(user=request.user, recipe=recipe)
@@ -167,14 +144,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {'detail': 'Список покупок пуст'},
                 status=status.HTTP_404_NOT_FOUND
             )
-
         content = self._format_shopping_list(ingredients)
         response = FileResponse(
             io.BytesIO(content.encode('utf-8')),
             content_type='text/plain; charset=utf-8'
         )
-        response['Content-Disposition'] = (
-            'attachment; filename=shopping_list.txt')
+        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
         return response
 
     @staticmethod
@@ -213,8 +188,7 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @action(detail=False, methods=('get',), permission_classes=(
-            IsAuthenticated,))
+    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
@@ -225,12 +199,11 @@ class UserViewSet(DjoserUserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        authors = (
-            User.objects
-            .filter(subscriptions__user=request.user)
-            .annotate(recipes_count=Count('recipes'))
-            .order_by('recipes_count')
-        )
+        authors = User.objects.filter(
+            subscriptions_to_the_author__user=request.user
+        ).annotate(
+            recipes_count=Count('recipes')
+        ).order_by('recipes_count')
         page = self.paginate_queryset(authors)
         if page is not None:
             serializer = UserWithRecipesSerializer(
@@ -270,8 +243,35 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=False,
-        methods=('patch', 'put'),
-        permission_classes=(IsAuthenticated,)
+        methods=('put',),
+        permission_classes=(IsAuthenticated,),
+        url_path='me/avatar',
+        url_name='me/avatar'
+    )
+    def me_avatar(self, request):
+        serializer = SetAvatarSerializer(
+            request.user,
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            UserSerializer(request.user, context={'request': request}).data
+        )
+
+    @me_avatar.mapping.delete
+    def delete_me_avatar(self, request):
+        request.user.avatar = None
+        request.user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=('put',),
+        permission_classes=(IsAuthenticated,),
+        url_path='avatar',
+        url_name='avatar'
     )
     def avatar(self, request):
         serializer = SetAvatarSerializer(
@@ -287,20 +287,6 @@ class UserViewSet(DjoserUserViewSet):
 
     @avatar.mapping.delete
     def delete_avatar(self, request):
-        request.user.avatar.delete(save=False)
         request.user.avatar = None
         request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=False,
-        methods=('patch', 'put'),
-        permission_classes=(IsAuthenticated,),
-        url_path='me/avatar'
-    )
-    def me_avatar(self, request):
-        return self.avatar(request)
-
-    @me_avatar.mapping.delete
-    def delete_me_avatar(self, request):
-        return self.delete_avatar(request)

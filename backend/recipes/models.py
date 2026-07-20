@@ -148,7 +148,6 @@ class BaseFavoriteShopping(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ('-id',)
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
@@ -157,18 +156,18 @@ class BaseFavoriteShopping(models.Model):
         )
 
     def __str__(self):
-        recipe_name = self.recipe.name[:MAX_STR_DISPLAY_LENGTH]
-        verbose_name = self._meta.verbose_name
-        return f'{self.user} → {recipe_name} ({verbose_name})'
+        return f'{self.user} → {self.recipe.name[:MAX_STR_DISPLAY_LENGTH]} ({self._meta.verbose_name})'
 
 
 class Favorite(BaseFavoriteShopping):
     class Meta(BaseFavoriteShopping.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
+        ordering = ('recipe__name',)
 
 
 class ShoppingCart(BaseFavoriteShopping):
     class Meta(BaseFavoriteShopping.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+        ordering = ('recipe__name',)
