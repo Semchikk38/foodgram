@@ -74,7 +74,7 @@ DB_HOST=db
 DB_PORT=5432
 SECRET_KEY=ваш_секретный_ключ
 DEBUG=False
-ALLOWED_HOSTS=foodgram.servequake.com,51.250.18.171
+ALLOWED_HOSTS=foodgram.servequake.com,158.160.187.115
 ```
 3. В папке `infra` выполните:
 ```bash
@@ -100,3 +100,5 @@ OpenAPI-спецификация доступна по адресу /api/docs/ (
 _Семён Ерошевич_<br>
 **email**: _semchik.er@gmail.com_<br>
 **GitHub** _Semchik38_ 
+
+[![Reviewed by EugeneSal](https://img.shields.io/badge/Reviewed_by-EugeneSal-brightgreen)](https://github.com/EugeneSal)

@@ -4,7 +4,14 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from recipes.constants import MIN_INGREDIENT_AMOUNT
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from users.models import Subscription, User
 
 
@@ -19,8 +26,7 @@ class UserSerializer(DjoserUserSerializer):
         return (
             request
             and request.user.is_authenticated
-            and obj.subscriptions_to_the_author.filter(
-                user=request.user).exists()
+            and obj.subscriptions_to_the_author.filter(user=request.user).exists()
         )
 
 
@@ -39,8 +45,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredient.measurement_unit')
+    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
@@ -51,12 +56,7 @@ class IngredientWriteSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
         min_value=MIN_INGREDIENT_AMOUNT,
-        error_messages={
-            'min_value': (
-                f'Количество должно быть больше '
-                f'{MIN_INGREDIENT_AMOUNT - 1}'
-            )
-        }
+        error_messages={'min_value': f'Количество должно быть больше {MIN_INGREDIENT_AMOUNT - 1}'}
     )
 
 
@@ -68,8 +68,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(
-        read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(read_only=True, default=False)
 
     class Meta:
         model = Recipe
@@ -89,8 +88,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
+        fields = ('id', 'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
 
     def validate(self, data):
         if not data.get('tags'):
@@ -133,8 +131,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
+        image_data = validated_data.pop('image', None)
 
         instance = super().update(instance, validated_data)
+
+        if image_data:
+            instance.image = image_data
+            instance.save()
 
         if tags:
             instance.tags.set(tags)
@@ -179,8 +182,7 @@ class UserWithRecipesSerializer(UserSerializer):
             except ValueError:
                 pass
         queryset = obj.recipes.all()[:limit]
-        return RecipeMinifiedSerializer(
-            queryset, many=True, context=self.context).data
+        return RecipeMinifiedSerializer(queryset, many=True, context=self.context).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -201,3 +203,25 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return UserWithRecipesSerializer(
             instance.author, context=self.context
         ).data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe')
+
+    def validate(self, data):
+        if data['user'] == data['recipe'].author:
+            raise serializers.ValidationError('Нельзя добавить в избранное свой рецепт')
+        return data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = ('user', 'recipe')
+
+    def validate(self, data):
+        if data['user'] == data['recipe'].author:
+            raise serializers.ValidationError('Нельзя добавить в корзину свой рецепт')
+        return data
