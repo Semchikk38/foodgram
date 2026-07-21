@@ -29,7 +29,8 @@ from api.serializers import (
     UserSerializer,
     UserWithRecipesSerializer,
 )
-from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import Subscription, User
 
 
@@ -66,13 +67,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     Favorite.objects.filter(user=user, recipe=OuterRef('pk'))
                 ),
                 is_in_shopping_cart=Exists(
-                    ShoppingCart.objects.filter(user=user, recipe=OuterRef('pk'))
+                    ShoppingCart.objects.filter(user=user,
+                                                recipe=OuterRef('pk'))
                 ),
             )
         else:
             queryset = queryset.annotate(
                 is_favorited=Value(False, output_field=models.BooleanField()),
-                is_in_shopping_cart=Value(False, output_field=models.BooleanField()),
+                is_in_shopping_cart=Value(False,
+                                          output_field=models.BooleanField()),
             )
         return queryset
 
@@ -93,7 +96,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     def _delete_relation(self, request, pk, model):
-        deleted, _ = model.objects.filter(user=request.user, recipe_id=pk).delete()
+        deleted, _ = model.objects.filter(
+            user=request.user, recipe_id=pk).delete()
         if not deleted:
             return Response(
                 {'detail': 'Объект не найден'},
@@ -119,7 +123,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk=None):
-        return self._add_relation(request, pk, ShoppingCart, ShoppingCartSerializer)
+        return self._add_relation(
+            request, pk, ShoppingCart, ShoppingCartSerializer)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
@@ -148,7 +153,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             io.BytesIO(content.encode('utf-8')),
             content_type='text/plain; charset=utf-8'
         )
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt')
         return response
 
     @staticmethod
@@ -187,7 +193,8 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=('get',),
+            permission_classes=(IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
