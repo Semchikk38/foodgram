@@ -99,6 +99,8 @@ OpenAPI-спецификация доступна по адресу /api/docs/ (
 ### Автор:  
 _Семён Ерошевич_<br>
 **email**: _semchik.er@gmail.com_<br>
-**GitHub** _Semchik38_ 
+**GitHub** [Semchikk38](https://github.com/Semchikk38) 
 
 [![Reviewed by EugeneSal](https://img.shields.io/badge/Reviewed_by-EugeneSal-brightgreen)](https://github.com/EugeneSal)
+
+
