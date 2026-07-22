@@ -20,7 +20,6 @@ from api.serializers import (
     FavoriteSerializer,
     IngredientSerializer,
     RecipeCreateUpdateSerializer,
-    RecipeMinifiedSerializer,
     RecipeReadSerializer,
     SetAvatarSerializer,
     ShoppingCartSerializer,
