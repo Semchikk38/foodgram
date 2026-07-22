@@ -16,6 +16,8 @@
 ##  Демо-версия
 Проект развёрнут и доступен по адресу:  
 [https://foodgram.servequake.com](https://foodgram.servequake.com)
+**Имя ресурса:** r-backend-vm-1028455730
+**Username для подключения** (ubuntu)
 
 ##  Технологический стек
 - **Backend:** Python 3.10, Django 4.2 LTS, Django REST Framework  
