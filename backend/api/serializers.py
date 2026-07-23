@@ -24,7 +24,8 @@ class UserSerializer(DjoserUserSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.subscriptions_to_the_author.filter(user=request.user).exists()
+            return obj.subscriptions_to_the_author.filter(
+                user=request.user).exists()
         return False
 
 
@@ -43,7 +44,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
@@ -71,7 +73,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True, default=False)
 
     class Meta:
         model = Recipe
@@ -91,7 +94,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
+        fields = ('id', 'tags', 'ingredients', 'name',
+                  'image', 'text', 'cooking_time')
 
     def validate(self, data):
         if not data.get('tags'):
@@ -179,7 +183,8 @@ class UserWithRecipesSerializer(UserSerializer):
         queryset = obj.recipes.all()
         if limit is not None:
             queryset = queryset[:limit]
-        return RecipeMinifiedSerializer(queryset, many=True, context=self.context).data
+        return RecipeMinifiedSerializer(
+            queryset, many=True, context=self.context).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -215,7 +220,8 @@ class BaseRelationSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return RecipeMinifiedSerializer(instance.recipe, context=self.context).data
+        return RecipeMinifiedSerializer(
+            instance.recipe, context=self.context).data
 
 
 class FavoriteSerializer(BaseRelationSerializer):
