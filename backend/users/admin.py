@@ -6,8 +6,7 @@ from .models import Subscription, User
 
 @admin.register(User)
 class UserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name',
-                    'last_name', 'recipes_count', 'followers_count')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'recipes_count', 'followers_count')
     search_fields = ('username', 'email')
     list_filter = ('is_active', 'is_staff')
 
@@ -16,7 +15,7 @@ class UserAdmin(UserAdmin):
     recipes_count.short_description = 'Рецептов'
 
     def followers_count(self, obj):
-        return obj.following.count()
+        return obj.subscriptions_to_the_author.count()
     followers_count.short_description = 'Подписчиков'
 
 
