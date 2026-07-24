@@ -133,7 +133,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients = RecipeIngredient.objects.filter(
-            recipe__in_shopping_cart__user=request.user
+            recipe__shoppingcart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(
@@ -189,8 +189,8 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @action(detail=False, methods=('get',), permission_classes=(
-            IsAuthenticated,))
+    @action(detail=False, methods=('get',),
+            permission_classes=(IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
